@@ -42,7 +42,7 @@ makedepends = [
     "xz-devel",
 ]
 pkgdesc = "Display server, multimedia framework, and desktop engine"
-license = "GPL-2.0-or-later AND BSD-3-Clause AND LGPL-2.1-only"
+license = "GPL-2.0-or-later AND BSD-3-Clause AND LGPL-2.1-only AND MIT"
 url = "https://arcan-fe.com"
 source = f"https://github.com/letoram/arcan/archive/refs/tags/{pkgver}.tar.gz"
 sha256 = "63d925d100389e7a1074a8746a080a01d94739df487c2f8e311eb49adc006c6e"
@@ -69,3 +69,4 @@ def post_install(self):
     self.install_license("data/distr/LICENSE.BSD")
     self.install_license("data/distr/LICENSE.GPL")
     self.install_license("data/distr/LICENSE.LGPL")
+    self.install_license("data/distr/LICENSE.MIT")
