@@ -1,0 +1,26 @@
+From: packaging
+Subject: [PATCH] link EGL without a GLVND OpenGL::EGL target
+
+CMake's FindOpenGL only creates the OpenGL::EGL imported target when
+GLVND is present. Chimera builds Mesa with -Dglvnd=disabled, so
+libEGL exists (and OPENGL_egl_LIBRARY is set) but the target is not.
+The existing NetBSD/OpenBSD branch already links the raw library.
+
+https://codeberg.org/letoram/arcan/commit/76d6603e547386117e43aaa2737824a6dd9999eb
+
+---
+ src/platform/cmake/CMakeLists.Video | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/platform/cmake/CMakeLists.Video b/src/platform/cmake/CMakeLists.Video
+--- a/src/platform/cmake/CMakeLists.Video
++++ b/src/platform/cmake/CMakeLists.Video
+@@ -54,7 +54,7 @@ elseif(VIDEO_PLATFORM STREQUAL "egl-dri")
+ 
+ # workaround CMake FindOpenGL module messing up because GLVND
+ # on non-linux systems.
+-	if (${CMAKE_SYSTEM_NAME} MATCHES "NetBSD|OpenBSD")
++	if (${CMAKE_SYSTEM_NAME} MATCHES "NetBSD|OpenBSD" OR NOT TARGET OpenGL::EGL)
+ 		list(APPEND VIDEO_LIBRARIES
+ 			${OPENGL_egl_LIBRARY}
+ 			${GBMKMS_LINK_LIBRARIES}

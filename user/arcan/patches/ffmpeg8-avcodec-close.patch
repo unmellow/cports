@@ -1,0 +1,59 @@
+From: packaging
+Subject: [PATCH] encode: stop calling avcodec_close
+
+FFmpeg 8 removed avcodec_close() (deprecated since 2016, public API
+dropped with FF_API_AVCODEC_CLOSE). These are all open-failure paths,
+so free the context. avcodec_free_context() also clears the pointer.
+
+The default video setup previously nulled the context and then closed
+it, which was a no-op.
+
+---
+ src/frameserver/encode/default/encode_presets.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/src/frameserver/encode/default/encode_presets.c b/src/frameserver/encode/default/encode_presets.c
+--- a/src/frameserver/encode/default/encode_presets.c
++++ b/src/frameserver/encode/default/encode_presets.c
+@@ -61,9 +61,8 @@ static bool default_vcodec_setup(struct codec_ent* dst, unsigned width,
+ 
+ 	if (avcodec_open2(dst->storage.video.context,
+ 		dst->storage.video.codec, NULL) != 0){
++		avcodec_free_context(&dst->storage.video.context);
+ 		dst->storage.video.codec   = NULL;
+-		dst->storage.video.context = NULL;
+-		avcodec_close(dst->storage.video.context);
+ 		return false;
+ 	}
+ 
+@@ -91,8 +90,7 @@ static bool default_acodec_setup(
+ 
+ 	if (avcodec_open2(
+ 		dst->storage.audio.context, dst->storage.audio.codec, NULL) != 0){
+-		avcodec_close(dst->storage.audio.context);
+-		dst->storage.audio.context = NULL;
++		avcodec_free_context(&dst->storage.audio.context);
+ 		dst->storage.audio.codec   = NULL;
+ 		return false;
+ 	}
+@@ -181,8 +179,7 @@ static bool setup_cb_x264(struct codec_ent* dst, unsigned width,
+ 
+ 	if (avcodec_open2(dst->storage.video.context,
+ 		dst->storage.video.codec, &opts) != 0){
+-		avcodec_close(dst->storage.video.context);
+-		dst->storage.video.context = NULL;
++		avcodec_free_context(&dst->storage.video.context);
+ 		dst->storage.video.codec   = NULL;
+ 		return false;
+ 	}
+@@ -247,8 +244,7 @@ static bool setup_cb_vp8(struct codec_ent* dst, unsigned width,
+ 	LOG("(encode) video setup @ %d * %d, %f fps, %d kbit / s.\n",
+ 		width, height, fps, vbr / 1024);
+ 	if (avcodec_open2(dst->storage.video.context,
+ 		dst->storage.video.codec, &opts) != 0){
+-		avcodec_close(dst->storage.video.context);
+-		dst->storage.video.context = NULL;
++		avcodec_free_context(&dst->storage.video.context);
+ 		dst->storage.video.codec   = NULL;
+ 		return false;
+ 	}
