@@ -66,3 +66,6 @@ def _(self):
 
 def post_install(self):
     self.install_license("COPYING")
+    self.install_license("data/distr/LICENSE.BSD")
+    self.install_license("data/distr/LICENSE.GPL")
+    self.install_license("data/distr/LICENSE.LGPL")
